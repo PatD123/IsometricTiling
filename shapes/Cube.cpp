@@ -1,6 +1,6 @@
 #include "Cube.h"
 
-const float Cube::vertices[108] = {
+const float Cube::m_vertices[108] = {
         -0.5f, -0.5f, -0.5f,
          0.5f, -0.5f, -0.5f,
          0.5f,  0.5f, -0.5f,
