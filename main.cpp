@@ -10,9 +10,20 @@
 #include "shapes/Cube.h"
 #include "camera/Camera.h"
 
-void framebuffer_size_callback(GLFWwindow* window, int width, int height);
+float deltaTime = 0.0f;	// Time between current frame and last frame
+float lastFrame = 0.0f; // Time of last frame
+
+void framebufferSizeCallback(GLFWwindow* window, int width, int height);
+void mouseCallback(GLFWwindow* window, double xpos, double ypos);
 
 void processInput(GLFWwindow* window);
+
+// Making Camera
+Camera cam(glm::vec3(0.0f, 0.0f, 0.0f));
+const float radius = 5.0f;
+bool firstMouse = true;
+float lastX = 800.0f / 2.0;
+float lastY = 600.0 / 2.0;
 
 int main()
 {
@@ -38,7 +49,8 @@ int main()
 
     glViewport(0, 0, 800, 600);
 
-    glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+    glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
+    glfwSetCursorPosCallback(window, mouseCallback);
 
     // Compile and link shaders
     ShaderHelper sh;
@@ -49,6 +61,9 @@ int main()
     // Enable z-buffer depth testing
     glEnable(GL_DEPTH_TEST);
 
+    // Capture cursor
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+
     // Sidenote on instancing
     /*
     glDrawArraysInstanced (or whatever it is called), you specify what your instance is, which 
@@ -57,10 +72,6 @@ int main()
     often I should be switching to a new Matrix to transform our cube. We want it so that 
     for each instance of a cube, we use a new matrix. That's what it does.
     */
-
-    // Making Camera
-    Camera cam(glm::vec3(0.0f, 0.0f, 0.0f));
-    const float radius = 5.0f;
 
     // Cube instances
     Cube cube1;
@@ -105,30 +116,20 @@ int main()
 
     while (!glfwWindowShouldClose(window))
     {
+        float currentFrame = (float) glfwGetTime();
+        deltaTime = currentFrame - lastFrame;
+        lastFrame = currentFrame;
+
+        cam.processMovement(window, deltaTime);
         processInput(window);
 
         // Clear colors on screen so we start at fresh slate
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        // Camera
-        float camX = sin(glfwGetTime()) * radius;
-        float camZ = cos(glfwGetTime()) * radius;
-        glm::vec3 newCameraPos = glm::vec3(camX, 0.0, camZ);
-        cam.setPosition(newCameraPos);
-
-        // Look at
-        glm::mat4 lookAtMat = glm::lookAt(
-            cam.m_pos, 
-            glm::vec3(0.0, 0.0, 0.0),
-            glm::vec3(0.0, 1.0, 0.0)
-        );
-
         // Transforms of Cube
         glm::mat4 model = glm::mat4(1.0f);
-        glm::mat4 view = glm::mat4(1.0f);
-        view = glm::translate(view, glm::vec3(0.0f, 0.0f, -8.0f));
-        view = lookAtMat;
+        glm::mat4 view = cam.getViewMat();
         glm::mat4 proj = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 100.0f);
 
         // Add transforms as uniforms
@@ -152,7 +153,7 @@ int main()
     return 0;
 }
 
-void framebuffer_size_callback(GLFWwindow* window, int width, int height)
+void framebufferSizeCallback(GLFWwindow* window, int width, int height)
 {
     glViewport(0, 0, width, height);
 }
@@ -161,4 +162,25 @@ void processInput(GLFWwindow* window)
 {
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
+}
+
+void mouseCallback(GLFWwindow* window, double dXPos, double dYPos)
+{
+    float xpos = static_cast<float>(dXPos);
+    float ypos = static_cast<float>(dYPos);
+
+    if (firstMouse)
+    {
+        lastX = xpos;
+        lastY = ypos;
+        firstMouse = false;
+    }
+
+    float xoffset = xpos - lastX;
+    float yoffset = lastY - ypos;
+
+    cam.processMouseMovement(xoffset, yoffset);
+
+    lastX = xpos;
+    lastY = ypos;
 }
