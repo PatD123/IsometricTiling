@@ -77,9 +77,12 @@ int main()
     Cube cube1;
 
     // Instancing
-    glm::mat4 cubeTransforms[2];
+    glm::mat4 cubeTransforms[5];
     cubeTransforms[0] = glm::mat4();
     cubeTransforms[1] = glm::translate(glm::mat4(), glm::vec3(2.0f, 2.0f, 0.0f));
+    cubeTransforms[2] = glm::translate(glm::mat4(), glm::vec3(2.0f, -2.0f, 0.0f));
+    cubeTransforms[3] = glm::translate(glm::mat4(), glm::vec3(2.0f, -2.0f, -4.0f));
+    cubeTransforms[4] = glm::translate(glm::mat4(), glm::vec3(0.0f, -1.0f, 0.0f));
 
     GLuint cubeTransformsVBO;
     glGenBuffers(1, &cubeTransformsVBO);
@@ -144,7 +147,7 @@ int main()
         // Draw
         glUseProgram(shaderProgram);
         glBindVertexArray(cubeVAO);
-        glDrawArraysInstanced(GL_TRIANGLES, 0, 36, cubeTransforms->length());
+        glDrawArraysInstanced(GL_TRIANGLES, 0, 36, sizeof(cubeTransforms) / sizeof(glm::mat4));
 
         glfwSwapBuffers(window);
         glfwPollEvents();

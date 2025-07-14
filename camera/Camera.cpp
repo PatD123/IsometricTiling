@@ -27,6 +27,10 @@ void Camera::processMovement(GLFWwindow* window, float deltaTime) {
         m_pos -= cameraSpeed * m_right;
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
         m_pos += cameraSpeed * m_right;
+    if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)
+        m_pos += cameraSpeed * m_worldUp;
+    if (glfwGetKey(window, GLFW_KEY_Z) == GLFW_PRESS)
+        m_pos -= cameraSpeed * m_worldUp;
 }
 
 void Camera::updateCameraVectors() {
