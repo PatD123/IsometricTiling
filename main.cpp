@@ -1,4 +1,5 @@
 #include <iostream>
+#include <stdlib.h>
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
@@ -76,18 +77,32 @@ int main()
     // Cube instances
     Cube cube1;
 
-    // Instancing
-    glm::mat4 cubeTransforms[5];
-    cubeTransforms[0] = glm::mat4();
-    cubeTransforms[1] = glm::translate(glm::mat4(), glm::vec3(2.0f, 2.0f, 0.0f));
-    cubeTransforms[2] = glm::translate(glm::mat4(), glm::vec3(2.0f, -2.0f, 0.0f));
-    cubeTransforms[3] = glm::translate(glm::mat4(), glm::vec3(2.0f, -2.0f, -4.0f));
-    cubeTransforms[4] = glm::translate(glm::mat4(), glm::vec3(0.0f, -1.0f, 0.0f));
+    // Transform and Color instancing
+    glm::mat4 cubeTransforms[100];
+    glm::vec3 cubeColors[100];
+    for (int i = 0; i < 10; ++i) {
+        for (int j = 0; j < 10; ++j) {
+            int idx = 10 * i + j;
+            cubeTransforms[idx] =
+                glm::translate(glm::mat4(), glm::vec3(static_cast<float>(i), 0.0f, static_cast<float>(j)));
+            cubeColors[idx] = glm::vec3(
+                static_cast<float>(rand()) / RAND_MAX,
+                static_cast<float>(rand()) / RAND_MAX,
+                static_cast<float>(rand()) / RAND_MAX
+            );
+        }
+    }
 
     GLuint cubeTransformsVBO;
     glGenBuffers(1, &cubeTransformsVBO);
     glBindBuffer(GL_ARRAY_BUFFER, cubeTransformsVBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(cubeTransforms), cubeTransforms, GL_STATIC_DRAW);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+    GLuint cubeColorsVBO;
+    glGenBuffers(1, &cubeColorsVBO);
+    glBindBuffer(GL_ARRAY_BUFFER, cubeColorsVBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(cubeColors), cubeColors, GL_STATIC_DRAW);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
     // Create VAOs and VBOs
@@ -105,13 +120,19 @@ int main()
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GL_FLOAT), (void*)0);
     glEnableVertexAttribArray(0);
 
-    // Binding transform instance
+    // Binding cube transform instances
     glBindBuffer(GL_ARRAY_BUFFER, cubeTransformsVBO);
     for (int i = 0; i < 4; i++) {
         glEnableVertexAttribArray(3 + i);
         glVertexAttribPointer(3 + i, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (void*)(i * sizeof(glm::vec4)));
         glVertexAttribDivisor(3 + i, 1);
     }
+
+    // Binding cube color instances
+    glBindBuffer(GL_ARRAY_BUFFER, cubeColorsVBO);
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GL_FLOAT), (void*)0);
+    glVertexAttribDivisor(1, 1);
 
     // Reset binds
     glBindBuffer(GL_ARRAY_BUFFER, 0);
