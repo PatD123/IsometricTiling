@@ -1,5 +1,6 @@
 #include <iostream>
 #include <stdlib.h>
+#include <cmath>
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
@@ -11,6 +12,8 @@
 #include "shapes/Cube.h"
 #include "camera/Camera.h"
 
+// Timing
+float PROGRAM_START_TIME = glfwGetTime();
 float deltaTime = 0.0f;	// Time between current frame and last frame
 float lastFrame = 0.0f; // Time of last frame
 
@@ -78,13 +81,19 @@ int main()
     Cube cube1;
 
     // Transform and Color instancing
-    glm::mat4 cubeTransforms[100];
-    glm::vec3 cubeColors[100];
-    for (int i = 0; i < 10; ++i) {
-        for (int j = 0; j < 10; ++j) {
-            int idx = 10 * i + j;
+    const int NUM_CUBES = 100;
+    const int NUM_CUBES_ROWS = 10;
+    const int NUM_CUBES_COLS = 10;
+    const float OMEGA = 5.0f;
+    glm::mat4 cubeTransforms[NUM_CUBES];
+    float cubePhases[NUM_CUBES];
+    glm::vec3 cubeColors[NUM_CUBES];
+    for (int i = 0; i < NUM_CUBES_ROWS; ++i) {
+        for (int j = 0; j < NUM_CUBES_COLS; ++j) {
+            int idx = NUM_CUBES_ROWS * i + j;
             cubeTransforms[idx] =
                 glm::translate(glm::mat4(), glm::vec3(static_cast<float>(i), 0.0f, static_cast<float>(j)));
+            cubePhases[idx] = static_cast<float>(rand()) / RAND_MAX;
             cubeColors[idx] = glm::vec3(
                 static_cast<float>(rand()) / RAND_MAX,
                 static_cast<float>(rand()) / RAND_MAX,
@@ -185,6 +194,16 @@ int main()
         GLuint proj_view_loc = glGetUniformLocation(shaderProgram, "proj_view");
         glUniformMatrix4fv(proj_view_loc, 1, GL_FALSE, glm::value_ptr(proj_view));
 
+        // Update sinusoidal transforms of cubes
+        timeDiff = currTime - PROGRAM_START_TIME;
+        for (int i = 0; i < NUM_CUBES; i++) {
+            float sin_height = 0.5f * glm::sin(OMEGA * (timeDiff + cubePhases[i]) +cubePhases[i]);
+            cubeTransforms[i][3][1] = sin_height;
+        }
+        glBindBuffer(GL_ARRAY_BUFFER, cubeTransformsVBO);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(cubeTransforms), cubeTransforms, GL_STATIC_DRAW);
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
+        glBindVertexArray(0);
 
         // Draw
         glUseProgram(shaderProgram);
