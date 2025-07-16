@@ -7,11 +7,10 @@ layout(location = 3) in mat4 aTransform;
 out vec3 Color;
 
 uniform mat4 model;
-uniform mat4 view;
-uniform mat4 proj;
+uniform mat4 proj_view;
 
 void main()
 {
-    gl_Position = proj * view * aTransform * model * vec4(aPos, 1.0);
+    gl_Position = proj_view * aTransform * model * vec4(aPos, 1.0);
     Color = aColor;
 }

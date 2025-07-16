@@ -138,8 +138,30 @@ int main()
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
 
+    // FPS metrics
+    double prevTime = 0.0;
+    double currTime = 0.0;
+    double timeDiff;
+    unsigned int frameCounter = 0;
+
+    // Enable V-sync for v-blanks
+    glfwSwapInterval(1);
+
     while (!glfwWindowShouldClose(window))
     {
+        // We are now around 60 FPS, 16-17 ms per frame.
+        currTime = glfwGetTime();
+        timeDiff = currTime - prevTime;
+        frameCounter++;
+        if (timeDiff >= 1.0 / 30.0) {
+            std::string FPS = std::to_string((1.0 / timeDiff) * frameCounter);
+            std::string ms = std::to_string((timeDiff / frameCounter) * 1000);
+            std::string windowTitle = "FPS: " + FPS + " | ms: " + ms;
+            glfwSetWindowTitle(window, windowTitle.c_str());
+            prevTime = currTime;
+            frameCounter = 0;
+        }
+
         float currentFrame = (float) glfwGetTime();
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
@@ -155,14 +177,13 @@ int main()
         glm::mat4 model = glm::mat4(1.0f);
         glm::mat4 view = cam.getViewMat();
         glm::mat4 proj = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 100.0f);
+        glm::mat4 proj_view = proj * view;
 
         // Add transforms as uniforms
         GLuint model_loc = glGetUniformLocation(shaderProgram, "model");
         glUniformMatrix4fv(model_loc, 1, GL_FALSE, glm::value_ptr(model));
-        GLuint view_loc = glGetUniformLocation(shaderProgram, "view");
-        glUniformMatrix4fv(view_loc, 1, GL_FALSE, glm::value_ptr(view));
-        GLuint proj_loc = glGetUniformLocation(shaderProgram, "proj");
-        glUniformMatrix4fv(proj_loc, 1, GL_FALSE, glm::value_ptr(proj));
+        GLuint proj_view_loc = glGetUniformLocation(shaderProgram, "proj_view");
+        glUniformMatrix4fv(proj_view_loc, 1, GL_FALSE, glm::value_ptr(proj_view));
 
 
         // Draw
