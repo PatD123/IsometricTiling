@@ -85,6 +85,7 @@ int main()
     const int NUM_CUBES_ROWS = 10;
     const int NUM_CUBES_COLS = 10;
     const float OMEGA = 5.0f;
+    const float AMPLITUDE = 0.2f;
     glm::mat4 cubeTransforms[NUM_CUBES];
     float cubePhases[NUM_CUBES];
     glm::vec3 cubeColors[NUM_CUBES];
@@ -197,7 +198,7 @@ int main()
         // Update sinusoidal transforms of cubes
         timeDiff = currTime - PROGRAM_START_TIME;
         for (int i = 0; i < NUM_CUBES; i++) {
-            float sin_height = 0.5f * glm::sin(OMEGA * (timeDiff + cubePhases[i]) +cubePhases[i]);
+            float sin_height = AMPLITUDE * glm::sin(OMEGA * (timeDiff + cubePhases[i]) + cubePhases[i]);
             cubeTransforms[i][3][1] = sin_height;
         }
         glBindBuffer(GL_ARRAY_BUFFER, cubeTransformsVBO);
