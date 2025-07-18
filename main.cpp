@@ -9,8 +9,16 @@
 #include <glm/gtc/type_ptr.hpp>
 
 #include "common/ShaderHelper.h"
+#include "common/PerlinNoise.hpp"
 #include "shapes/Cube.h"
 #include "camera/Camera.h"
+
+const int NUM_CUBES = 100;
+const int TILING_ROWS = 20;
+const int TILING_COLS = 20;
+const int TILING_HEIGHT = 20;
+const float OMEGA = 5.0f;
+const float AMPLITUDE = 0.2f;
 
 // Timing
 float PROGRAM_START_TIME = glfwGetTime();
@@ -77,21 +85,50 @@ int main()
     for each instance of a cube, we use a new matrix. That's what it does.
     */
 
+    // Transform and Color instancing
+    glm::mat4 cubeTransforms[TILING_ROWS * TILING_COLS * TILING_HEIGHT];
+    glm::vec3 cubeColors[TILING_ROWS * TILING_COLS * TILING_HEIGHT];
+    int tilingHeightmap[TILING_ROWS * TILING_COLS];
+    float cubePhases[TILING_ROWS * TILING_COLS * TILING_HEIGHT];
+
+    // Perlin Noise
+    PerlinNoise2D pn;
+    for (int i = 0; i < TILING_ROWS; i++) {
+        for (int j = 0; j < TILING_COLS; j++) {
+            tilingHeightmap[TILING_ROWS * i + j] = static_cast<int>(glm::abs(pn.eval(glm::vec2(i * 0.1, j * 0.1)) * TILING_HEIGHT));
+        }
+    }
+
     // Cube instances
     Cube cube1;
 
-    // Transform and Color instancing
-    const int NUM_CUBES = 100;
-    const int NUM_CUBES_ROWS = 10;
-    const int NUM_CUBES_COLS = 10;
-    const float OMEGA = 5.0f;
-    const float AMPLITUDE = 0.2f;
-    glm::mat4 cubeTransforms[NUM_CUBES];
-    float cubePhases[NUM_CUBES];
-    glm::vec3 cubeColors[NUM_CUBES];
-    for (int i = 0; i < NUM_CUBES_ROWS; ++i) {
-        for (int j = 0; j < NUM_CUBES_COLS; ++j) {
-            int idx = NUM_CUBES_ROWS * i + j;
+    int NUM_CUBES = 0;
+    for (int i = 0; i < TILING_ROWS; i++) {
+        for (int k = 0; k < TILING_COLS; k++) {
+            int height = tilingHeightmap[TILING_ROWS * i + k];
+            for (int j = 0; j < height; j++) {
+                cubeTransforms[NUM_CUBES] = glm::translate(
+                    glm::mat4(),
+                    glm::vec3(
+                        static_cast<float>(i),
+                        static_cast<float>(j),
+                        static_cast<float>(k)
+                    )
+                );
+                /*cubePhases[idx] = static_cast<float>(rand()) / RAND_MAX;*/
+                cubeColors[NUM_CUBES] = glm::vec3(
+                    0.2f,
+                    0.2f,
+                    j / static_cast<float>(TILING_HEIGHT)
+                );
+                NUM_CUBES++;
+            }
+        }
+    }
+
+    /*for (int i = 0; i < TILING_ROWS; ++i) {
+        for (int j = 0; j < TILING_COLS; ++j) {
+            int idx = TILING_ROWS * i + j;
             cubeTransforms[idx] =
                 glm::translate(glm::mat4(), glm::vec3(static_cast<float>(i), 0.0f, static_cast<float>(j)));
             cubePhases[idx] = static_cast<float>(rand()) / RAND_MAX;
@@ -101,7 +138,7 @@ int main()
                 static_cast<float>(rand()) / RAND_MAX
             );
         }
-    }
+    }*/
 
     GLuint cubeTransformsVBO;
     glGenBuffers(1, &cubeTransformsVBO);
@@ -196,7 +233,7 @@ int main()
         glUniformMatrix4fv(proj_view_loc, 1, GL_FALSE, glm::value_ptr(proj_view));
 
         // Update sinusoidal transforms of cubes
-        timeDiff = currTime - PROGRAM_START_TIME;
+        /*timeDiff = currTime - PROGRAM_START_TIME;
         for (int i = 0; i < NUM_CUBES; i++) {
             float sin_height = AMPLITUDE * glm::sin(OMEGA * (timeDiff + cubePhases[i]) + cubePhases[i]);
             cubeTransforms[i][3][1] = sin_height;
@@ -204,12 +241,12 @@ int main()
         glBindBuffer(GL_ARRAY_BUFFER, cubeTransformsVBO);
         glBufferData(GL_ARRAY_BUFFER, sizeof(cubeTransforms), cubeTransforms, GL_STATIC_DRAW);
         glBindBuffer(GL_ARRAY_BUFFER, 0);
-        glBindVertexArray(0);
+        glBindVertexArray(0);*/
 
         // Draw
         glUseProgram(shaderProgram);
         glBindVertexArray(cubeVAO);
-        glDrawArraysInstanced(GL_TRIANGLES, 0, 36, sizeof(cubeTransforms) / sizeof(glm::mat4));
+        glDrawArraysInstanced(GL_TRIANGLES, 0, 36, NUM_CUBES);
 
         glfwSwapBuffers(window);
         glfwPollEvents();
