@@ -23,7 +23,7 @@ public:
 	
 	float m_yaw = YAW;
 	float m_pitch = PITCH;
-	float m_camSpeed = 2.5f;
+	float m_camSpeed = 5.0f;
 	float m_mouseSensitivity = 0.1f;
 
 	Camera(glm::vec3 pos);

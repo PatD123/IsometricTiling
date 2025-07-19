@@ -20,7 +20,7 @@ public:
     static const int tableSizeMask = tableSize - 1;
     int permutationTable[tableSize * 2];
 
-    PerlinNoise2D(const int seed = 20124)
+    PerlinNoise2D(const int seed = 2024)
     {
         std::mt19937 generator(seed);
 

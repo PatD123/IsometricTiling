@@ -15,9 +15,9 @@
 
 // About tiling
 const int NUM_CUBES = 100;
-const int TILING_ROWS = 30;
-const int TILING_COLS = 30;
-const int TILING_HEIGHT = 15;
+const int TILING_ROWS = 100;
+const int TILING_COLS = 100;
+const int TILING_HEIGHT = 30;
 const float OMEGA = 5.0f;
 const float AMPLITUDE = 0.2f;
 
@@ -112,7 +112,7 @@ int main()
     /*float cubePhases[TILING_ROWS * TILING_COLS * TILING_HEIGHT];*/
 
     // Perlin Noise
-    PerlinNoise2D pn;
+    PerlinNoise2D pn(rand());
     for (int i = 0; i < TILING_ROWS; i++) {
         for (int j = 0; j < TILING_COLS; j++) {
             tilingHeightmap.push_back(
@@ -120,6 +120,7 @@ int main()
             );
         }
     }
+    std::cout << "Created heightmap from Perlin Noise" << std::endl;
 
     // Cube instances
     Cube cube1;
@@ -181,6 +182,7 @@ int main()
             }
         }
     }
+    std::cout << "Created my cube transforms list with " << NUM_CUBES << " cubes." << std::endl;
 
     /*for (int i = 0; i < TILING_ROWS; ++i) {
         for (int j = 0; j < TILING_COLS; ++j) {
@@ -201,12 +203,16 @@ int main()
     glBindBuffer(GL_ARRAY_BUFFER, cubeTransformsVBO);
     glBufferData(GL_ARRAY_BUFFER, cubeTransforms.size() * sizeof(glm::mat4), cubeTransforms.data(), GL_STATIC_DRAW);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
+    
+    std::cout << "Moved transforms to GPU" << std::endl;
 
     GLuint cubeColorsVBO;
     glGenBuffers(1, &cubeColorsVBO);
     glBindBuffer(GL_ARRAY_BUFFER, cubeColorsVBO);
-    glBufferData(GL_ARRAY_BUFFER, cubeColors.size() * sizeof(glm::mat4), cubeColors.data(), GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, cubeColors.size() * sizeof(glm::vec3), cubeColors.data(), GL_STATIC_DRAW);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+    std::cout << "Moved cube colors to GPU" << std::endl;
 
     // Create VAOs and VBOs
     GLuint cubeVBO, cubeVAO;
@@ -249,6 +255,8 @@ int main()
 
     // Enable V-sync for v-blanks
     glfwSwapInterval(1);
+
+    std::cout << "Starting to render" << std::endl;
 
     while (!glfwWindowShouldClose(window))
     {
