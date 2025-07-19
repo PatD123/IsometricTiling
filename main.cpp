@@ -13,12 +13,29 @@
 #include "shapes/Cube.h"
 #include "camera/Camera.h"
 
+// About tiling
 const int NUM_CUBES = 100;
-const int TILING_ROWS = 20;
-const int TILING_COLS = 20;
-const int TILING_HEIGHT = 20;
+const int TILING_ROWS = 30;
+const int TILING_COLS = 30;
+const int TILING_HEIGHT = 15;
 const float OMEGA = 5.0f;
 const float AMPLITUDE = 0.2f;
+
+// Each terrain type is associated with 
+// - Elevation
+// - Color
+const float WATER_LEVEL = 0.0f;
+const float SAND_LEVEL  = 0.0f;
+const float DIRT_LEVEL  = 0.2f;
+const float GRASS_LEVEL = 0.4f;
+const float ROCK_LEVEL  = 0.5f;
+const float SNOW_LEVEL  = 0.7f;
+const glm::vec3 WATER = glm::vec3(0.0f, 0.0f, 150.0f / 255.0f);
+const glm::vec3 SAND = glm::vec3(237.0f / 255.0f, 201.0f / 255.0f, 175.0f / 255.0f);
+const glm::vec3 DIRT = glm::vec3(155.0f / 255.0f, 118.0f / 255.0f, 83.0f / 255.0f);
+const glm::vec3 GRASS = glm::vec3(34.0f / 255.0f, 139.0f / 255.0f, 34.0f / 255.0f);
+const glm::vec3 ROCK = glm::vec3(120.0f / 255.0f, 120.0f / 255.0f, 120.0f / 255.0f);
+const glm::vec3 SNOW = glm::vec3(1.0f, 1.0f, 1.0f);
 
 // Timing
 float PROGRAM_START_TIME = glfwGetTime();
@@ -86,16 +103,21 @@ int main()
     */
 
     // Transform and Color instancing
-    glm::mat4 cubeTransforms[TILING_ROWS * TILING_COLS * TILING_HEIGHT];
-    glm::vec3 cubeColors[TILING_ROWS * TILING_COLS * TILING_HEIGHT];
-    int tilingHeightmap[TILING_ROWS * TILING_COLS];
-    float cubePhases[TILING_ROWS * TILING_COLS * TILING_HEIGHT];
+    std::vector<glm::mat4> cubeTransforms;
+    /*glm::mat4 cubeTransforms[TILING_ROWS * TILING_COLS * TILING_HEIGHT];*/
+    std::vector<glm::vec3> cubeColors;
+    /*glm::vec3 cubeColors[TILING_ROWS * TILING_COLS * TILING_HEIGHT];*/
+    std::vector<int> tilingHeightmap;
+    /*int tilingHeightmap[TILING_ROWS * TILING_COLS];*/
+    /*float cubePhases[TILING_ROWS * TILING_COLS * TILING_HEIGHT];*/
 
     // Perlin Noise
     PerlinNoise2D pn;
     for (int i = 0; i < TILING_ROWS; i++) {
         for (int j = 0; j < TILING_COLS; j++) {
-            tilingHeightmap[TILING_ROWS * i + j] = static_cast<int>(glm::abs(pn.eval(glm::vec2(i * 0.1, j * 0.1)) * TILING_HEIGHT));
+            tilingHeightmap.push_back(
+                static_cast<int>(glm::abs(pn.eval(glm::vec2(i * 0.1, j * 0.1)) * TILING_HEIGHT))
+            );
         }
     }
 
@@ -106,22 +128,56 @@ int main()
     for (int i = 0; i < TILING_ROWS; i++) {
         for (int k = 0; k < TILING_COLS; k++) {
             int height = tilingHeightmap[TILING_ROWS * i + k];
-            for (int j = 0; j < height; j++) {
-                cubeTransforms[NUM_CUBES] = glm::translate(
-                    glm::mat4(),
-                    glm::vec3(
-                        static_cast<float>(i),
-                        static_cast<float>(j),
-                        static_cast<float>(k)
+            if (height == 0.0) {
+                cubeTransforms.push_back(
+                    glm::translate(
+                        glm::mat4(),
+                        glm::vec3(
+                            static_cast<float>(i),
+                            0.0f,
+                            static_cast<float>(k)
+                        )
                     )
                 );
-                /*cubePhases[idx] = static_cast<float>(rand()) / RAND_MAX;*/
-                cubeColors[NUM_CUBES] = glm::vec3(
-                    0.2f,
-                    0.2f,
-                    j / static_cast<float>(TILING_HEIGHT)
-                );
+                cubeColors.push_back(WATER);
                 NUM_CUBES++;
+            }
+            else {
+                for (int j = 0; j < height; j++) {
+                    cubeTransforms.push_back(
+                        glm::translate(
+                            glm::mat4(),
+                            glm::vec3(
+                                static_cast<float>(i),
+                                static_cast<float>(j),
+                                static_cast<float>(k)
+                            )
+                        )
+                    );
+                    /*cubePhases[idx] = static_cast<float>(rand()) / RAND_MAX;*/
+                    /*cubeColors[NUM_CUBES] = glm::vec3(
+                        0.2f,
+                        0.2f,
+                        j / static_cast<float>(TILING_HEIGHT)
+                    );*/
+                    float relativeHeight = static_cast<float>(height) / TILING_HEIGHT;
+                    if (relativeHeight >= SNOW_LEVEL) {
+                        cubeColors.push_back(SNOW);
+                    }
+                    else if (relativeHeight >= ROCK_LEVEL) {
+                        cubeColors.push_back(ROCK);
+                    }
+                    else if (relativeHeight >= GRASS_LEVEL) {
+                        cubeColors.push_back(GRASS);
+                    }
+                    else if (relativeHeight >= DIRT_LEVEL) {
+                        cubeColors.push_back(DIRT);
+                    }
+                    else {
+                        cubeColors.push_back(SAND);
+                    }
+                    NUM_CUBES++;
+                }
             }
         }
     }
@@ -143,13 +199,13 @@ int main()
     GLuint cubeTransformsVBO;
     glGenBuffers(1, &cubeTransformsVBO);
     glBindBuffer(GL_ARRAY_BUFFER, cubeTransformsVBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(cubeTransforms), cubeTransforms, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, cubeTransforms.size() * sizeof(glm::mat4), cubeTransforms.data(), GL_STATIC_DRAW);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
     GLuint cubeColorsVBO;
     glGenBuffers(1, &cubeColorsVBO);
     glBindBuffer(GL_ARRAY_BUFFER, cubeColorsVBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(cubeColors), cubeColors, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, cubeColors.size() * sizeof(glm::mat4), cubeColors.data(), GL_STATIC_DRAW);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
     // Create VAOs and VBOs
