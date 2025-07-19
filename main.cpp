@@ -15,9 +15,9 @@
 
 // About tiling
 const int NUM_CUBES = 100;
-const int TILING_ROWS = 100;
-const int TILING_COLS = 100;
-const int TILING_HEIGHT = 30;
+const int TILING_ROWS = 70;
+const int TILING_COLS = 70;
+const int TILING_HEIGHT = 40;
 const float OMEGA = 5.0f;
 const float AMPLITUDE = 0.2f;
 
@@ -28,8 +28,8 @@ const float WATER_LEVEL = 0.0f;
 const float SAND_LEVEL  = 0.0f;
 const float DIRT_LEVEL  = 0.2f;
 const float GRASS_LEVEL = 0.4f;
-const float ROCK_LEVEL  = 0.5f;
-const float SNOW_LEVEL  = 0.7f;
+const float ROCK_LEVEL  = 0.6f;
+const float SNOW_LEVEL  = 0.8f;
 const glm::vec3 WATER = glm::vec3(0.0f, 0.0f, 150.0f / 255.0f);
 const glm::vec3 SAND = glm::vec3(237.0f / 255.0f, 201.0f / 255.0f, 175.0f / 255.0f);
 const glm::vec3 DIRT = glm::vec3(155.0f / 255.0f, 118.0f / 255.0f, 83.0f / 255.0f);
@@ -112,11 +112,19 @@ int main()
     /*float cubePhases[TILING_ROWS * TILING_COLS * TILING_HEIGHT];*/
 
     // Perlin Noise
-    PerlinNoise2D pn(rand());
+    PerlinNoise2D pn;
     for (int i = 0; i < TILING_ROWS; i++) {
         for (int j = 0; j < TILING_COLS; j++) {
+            float frequency = 0.02f; // smaller = smoother
+            float amplitude = 2.0f;
+            float height = 0.0f;
+            for (int o = 0; o < 4; o++) {
+                height += pn.perlin(i * frequency, j * frequency) * amplitude;
+                frequency *= 2.0f;
+                amplitude *= 0.5f;
+            }
             tilingHeightmap.push_back(
-                static_cast<int>(glm::abs(pn.eval(glm::vec2(i * 0.1, j * 0.1)) * TILING_HEIGHT))
+                static_cast<int>(glm::abs(height) * TILING_HEIGHT)
             );
         }
     }
