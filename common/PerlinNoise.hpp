@@ -2,6 +2,8 @@
 // Created by bryce-klein on 3/14/25 (https://github.com/mangokip/IsometricTerrain)
 //
 
+#pragma once
+
 #include <cmath>
 #include <cstdio>
 #include <random>

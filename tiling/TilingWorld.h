@@ -1,0 +1,84 @@
+#pragma once
+
+#include <iostream>
+#include <vector>
+
+#include <glad/glad.h>
+#include <GLFW/glfw3.h>
+#include <glm/glm.hpp>
+
+const float WATER_LEVEL = 0.0f;
+const float SAND_LEVEL = 0.0f;
+const float DIRT_LEVEL = 0.2f;
+const float GRASS_LEVEL = 0.4f;
+const float ROCK_LEVEL = 0.6f;
+const float SNOW_LEVEL = 0.8f;
+const glm::vec3 WATER = glm::vec3(0.0f, 0.0f, 150.0f / 255.0f);
+const glm::vec3 SAND = glm::vec3(237.0f / 255.0f, 201.0f / 255.0f, 175.0f / 255.0f);
+const glm::vec3 DIRT = glm::vec3(155.0f / 255.0f, 118.0f / 255.0f, 83.0f / 255.0f);
+const glm::vec3 GRASS = glm::vec3(34.0f / 255.0f, 139.0f / 255.0f, 34.0f / 255.0f);
+const glm::vec3 ROCK = glm::vec3(120.0f / 255.0f, 120.0f / 255.0f, 120.0f / 255.0f);
+const glm::vec3 SNOW = glm::vec3(1.0f, 1.0f, 1.0f);
+
+class TilingWorld {
+public:
+	TilingWorld(int tiling_rows, int tiling_cols, int tiling_height, int omega, int amplitude);
+
+	// Generates world using Perlin Noise.
+	void generateWorld(int seed);
+
+	// Draws all the cubes in our world.
+	void renderTiling();
+
+	// Animating water without drawing them - renderTiling() does this.
+	void animateWater();
+
+	void renderTiles();
+
+private:
+	glm::vec3 getTileColor(float height);
+
+	// World attributes
+	const int TILING_ROWS = 70;
+	const int TILING_COLS = 70;
+	const int TILING_HEIGHT = 40;
+	const float OMEGA = 5.0f;
+	const float AMPLITUDE = 0.2f;
+	int NUM_TILES = 0;
+
+	// All non water blocks
+	
+	// Transforms for non-water and water tiles.
+	std::vector<glm::mat4> terrainTileTransforms;
+	std::vector<glm::mat4> waterTileTransforms;
+
+	// Colors for non-water and water tiles.
+	std::vector<glm::vec3> terrainTileColors;
+	std::vector<glm::vec3> waterTileColors;
+
+	// World heightmap
+	std::vector<int> tilingHeightmap;
+
+	/*float cubePhases[TILING_ROWS * TILING_COLS * TILING_HEIGHT];*/
+
+	// Responsible for binding of buffers and rendering
+	GLuint tileVBO; // For the standard cube (layout == 1).
+
+	// Store all transform matrices in these guys
+	GLuint terrainTileVAO, waterTileVAO;
+
+	GLuint terrainTileTransformsVBO, waterTileTransformsVBO;
+	GLuint terrainTileColorsVBO, waterTileColorsVBO;
+
+	// World generation
+
+	// Make cube static 
+
+	// Have to sets of colors, transforms for non-water and water tiles.
+	// - Have one VAO specifying how the input buffers relate to input attr
+	//	 in the vertex shader for non-water tiles.
+	// - Have one VAO specifying how the input buffers relate to the input attr
+	//	 in the vertex shader for water tiles.
+	// - Bind and draw first VAO. Then bind and draw the second VAO.
+	//
+};
