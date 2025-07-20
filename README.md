@@ -1,6 +1,7 @@
 Cool first project to learn OpenGL: Isometric Tiling!
 
 - [X] Perlin Noise Procedural Generation
+<img width="789" height="632" alt="Screenshot 2025-07-18 204726" src="https://github.com/user-attachments/assets/07dfb2b3-d8b8-44e3-9bd9-929d76e63250" />
 <img width="791" height="634" alt="image" src="https://github.com/user-attachments/assets/c58a7a95-e836-474e-9750-b881d3c8176b" />
 <img width="780" height="629" alt="image" src="https://github.com/user-attachments/assets/355c258f-8c99-402a-8478-46036763e729" />
 
