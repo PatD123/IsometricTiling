@@ -2,8 +2,8 @@ Cool first project to learn OpenGL: Isometric Tiling!
 
 TODO :exclamation:
 - [ ] Texturing or Lighting (one of the two).
-- [ ] More refactoring for each Tile (Tile class).
-
+- [X] More refactoring for each Tile (Tile class).
+![Recording 2025-07-20 225430](https://github.com/user-attachments/assets/c1b039a0-1b8f-41e6-a32f-6460cf67409c)
 - [X] Animated watah!
 
 
