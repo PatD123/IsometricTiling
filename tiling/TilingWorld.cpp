@@ -7,7 +7,7 @@
 #include "../common/PerlinNoise.hpp"
 #include "../shapes/Cube.h"
 
-TilingWorld::TilingWorld(int tiling_rows, int tiling_cols, int tiling_height, int omega, int amplitude) 
+TilingWorld::TilingWorld(int tiling_rows, int tiling_cols, int tiling_height, int omega, float amplitude)
 	: TILING_ROWS(tiling_rows), TILING_COLS(tiling_cols), TILING_HEIGHT(tiling_height), OMEGA(omega), AMPLITUDE(amplitude)
 {
     Cube cube;
@@ -100,14 +100,13 @@ void TilingWorld::generateWorld(int seed) {
                         )
                     )
                 );
-                //cubePhases[idx] = static_cast<float>(rand()) / RAND_MAX;
                 float relativeHeight = static_cast<float>(j) / TILING_HEIGHT;
                 terrainTileColors.push_back(getTileColor(relativeHeight));
                 NUM_CUBES++;
             }
-            if (relativeHeight < WATER_LEVEL) {
-                for (; j < static_cast<int>(WATER_LEVEL * TILING_HEIGHT); j++) {
-                    waterTileTransforms.push_back(
+            if (height < WATER_LEVEL * TILING_HEIGHT) {
+                for (; j < static_cast<int>(WATER_LEVEL * TILING_HEIGHT) - 1; j++) {
+                    terrainTileTransforms.push_back(
                         glm::translate(
                             glm::mat4(),
                             glm::vec3(
@@ -117,43 +116,23 @@ void TilingWorld::generateWorld(int seed) {
                             )
                         )
                     );
-                    //cubePhases[idx] = static_cast<float>(rand()) / RAND_MAX;
-                    waterTileColors.push_back(WATER);
+                    terrainTileColors.push_back(WATER);
                     NUM_CUBES++;
                 }
+                waterTileTransforms.push_back(
+                    glm::translate(
+                        glm::mat4(),
+                        glm::vec3(
+                            static_cast<float>(i),
+                            static_cast<float>(j),
+                            static_cast<float>(k)
+                        )
+                    )
+                );
+                waterTilePhases.push_back(static_cast<float>(rand()) / RAND_MAX);
+                waterTileColors.push_back(WATER);
+                NUM_CUBES++;
             }
-            //if (height == 0.0) {
-            //    waterTileTransforms.push_back(
-            //        glm::translate(
-            //            glm::mat4(),
-            //            glm::vec3(
-            //                static_cast<float>(i),
-            //                0.0f,
-            //                static_cast<float>(k)
-            //            )
-            //        )
-            //    );
-            //    waterTileColors.push_back(WATER);
-            //    NUM_CUBES++;
-            //}
-            //else {
-            //    for (int j = 0; j < height; j++) {
-            //        terrainTileTransforms.push_back(
-            //            glm::translate(
-            //                glm::mat4(),
-            //                glm::vec3(
-            //                    static_cast<float>(i),
-            //                    static_cast<float>(j),
-            //                    static_cast<float>(k)
-            //                )
-            //            )
-            //        );
-            //        //cubePhases[idx] = static_cast<float>(rand()) / RAND_MAX;
-            //        float relativeHeight = static_cast<float>(j) / TILING_HEIGHT;
-            //        terrainTileColors.push_back(getTileColor(relativeHeight));
-            //        NUM_CUBES++;
-            //    }
-            //}
         }
     }
     std::cout << "Created my cube transforms list with " << NUM_CUBES << " cubes." << std::endl;
@@ -175,6 +154,17 @@ void TilingWorld::generateWorld(int seed) {
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
     std::cout << "Moved colors to GPU in VBOs." << std::endl;
+}
+
+void TilingWorld::animateWater(float timeDiff) {
+    // Update sinusoidal transforms of cubes
+    for (int i = 0; i < waterTileTransforms.size(); i++) {
+        float sin_height = AMPLITUDE * glm::sin(OMEGA * (timeDiff + waterTilePhases[i]) + waterTilePhases[i]) + AMPLITUDE + WATER_LEVEL * TILING_HEIGHT - 1;
+        waterTileTransforms[i][3][1] = sin_height;
+    }
+    glBindBuffer(GL_ARRAY_BUFFER, waterTileTransformsVBO);
+    glBufferData(GL_ARRAY_BUFFER, waterTileTransforms.size() * sizeof(glm::mat4), waterTileTransforms.data(), GL_STATIC_DRAW);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
 void TilingWorld::renderTiles() {

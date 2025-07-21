@@ -107,24 +107,10 @@ int main()
     int tiling_cols = 70;
     int tiling_height = 30;
     float omega = 5.0f;
-    float amplitude = 0.2f;
+    float amplitude = 0.5f;
     TilingWorld world(tiling_rows, tiling_cols, tiling_height, omega, amplitude);
 
     world.generateWorld(20);
-
-    /*for (int i = 0; i < TILING_ROWS; ++i) {
-        for (int j = 0; j < TILING_COLS; ++j) {
-            int idx = TILING_ROWS * i + j;
-            cubeTransforms[idx] =
-                glm::translate(glm::mat4(), glm::vec3(static_cast<float>(i), 0.0f, static_cast<float>(j)));
-            cubePhases[idx] = static_cast<float>(rand()) / RAND_MAX;
-            cubeColors[idx] = glm::vec3(
-                static_cast<float>(rand()) / RAND_MAX,
-                static_cast<float>(rand()) / RAND_MAX,
-                static_cast<float>(rand()) / RAND_MAX
-            );
-        }
-    }*/
 
     // FPS metrics
     double prevTime = 0.0;
@@ -175,21 +161,11 @@ int main()
         GLuint proj_view_loc = glGetUniformLocation(shaderProgram, "proj_view");
         glUniformMatrix4fv(proj_view_loc, 1, GL_FALSE, glm::value_ptr(proj_view));
 
-        // update sinusoidal transforms of cubes
-        /*timediff = currtime - program_start_time;
-        for (int i = 0; i < num_cubes; i++) {
-            float sin_height = amplitude * glm::sin(omega * (timediff + cubephases[i]) + cubephases[i]);
-            cubetransforms[i][3][1] = sin_height;
-        }
-        glbindbuffer(gl_array_buffer, cubetransformsvbo);
-        glbufferdata(gl_array_buffer, sizeof(cubetransforms), cubetransforms, gl_static_draw);
-        glbindbuffer(gl_array_buffer, 0);
-        glbindvertexarray(0);*/
-
         // draw
         glUseProgram(shaderProgram);
         /*glBindVertexArray(cubeVAO);
         glDrawArraysInstanced(GL_TRIANGLES, 0, 36, NUM_CUBES);*/
+        world.animateWater(currTime - PROGRAM_START_TIME);
         world.renderTiles();
 
         glfwSwapBuffers(window);

@@ -22,11 +22,11 @@ const glm::vec3 SNOW = glm::vec3(1.0f, 1.0f, 1.0f);
 
 class TilingWorld {
 public:
-	TilingWorld(int tiling_rows, int tiling_cols, int tiling_height, int omega, int amplitude);
+	TilingWorld(int tiling_rows, int tiling_cols, int tiling_height, int omega, float amplitude);
 
 	void generateWorld(int seed);
 
-	void animateWater();
+	void animateWater(float timeDiff);
 
 	void renderTiles();
 
@@ -38,7 +38,7 @@ private:
 	int TILING_COLS = 70;
 	int TILING_HEIGHT = 40;
 	float OMEGA = 5.0f;
-	float AMPLITUDE = 0.2f;
+	float AMPLITUDE = 1.0f;
 	int NUM_TILES = 0;
 
 	// All non water blocks
@@ -50,30 +50,16 @@ private:
 	// Colors for non-water and water tiles.
 	std::vector<glm::vec3> terrainTileColors;
 	std::vector<glm::vec3> waterTileColors;
+	std::vector<float> waterTilePhases;
 
 	// World heightmap
 	std::vector<int> tilingHeightmap;
-
-	/*float cubePhases[TILING_ROWS * TILING_COLS * TILING_HEIGHT];*/
 
 	// Responsible for binding of buffers and rendering
 	GLuint tileVBO; // For the standard cube (layout == 1).
 
 	// Store all transform matrices in these guys
 	GLuint terrainTileVAO, waterTileVAO;
-
 	GLuint terrainTileTransformsVBO, waterTileTransformsVBO;
 	GLuint terrainTileColorsVBO, waterTileColorsVBO;
-
-	// World generation
-
-	// Make cube static 
-
-	// Have to sets of colors, transforms for non-water and water tiles.
-	// - Have one VAO specifying how the input buffers relate to input attr
-	//	 in the vertex shader for non-water tiles.
-	// - Have one VAO specifying how the input buffers relate to the input attr
-	//	 in the vertex shader for water tiles.
-	// - Bind and draw first VAO. Then bind and draw the second VAO.
-	//
 };
