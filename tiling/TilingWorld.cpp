@@ -8,7 +8,7 @@
 #include "../shapes/Cube.h"
 
 TilingWorld::TilingWorld(int tiling_rows, int tiling_cols, int tiling_height, int omega, int amplitude) 
-	: TILING_ROWS(tiling_rows), TILING_COLS(tiling_cols), OMEGA(omega), AMPLITUDE(amplitude)
+	: TILING_ROWS(tiling_rows), TILING_COLS(tiling_cols), TILING_HEIGHT(tiling_height), OMEGA(omega), AMPLITUDE(amplitude)
 {
     Cube cube;
     glGenBuffers(1, &tileVBO);
@@ -69,10 +69,10 @@ void TilingWorld::generateWorld(int seed) {
     for (int i = 0; i < TILING_ROWS; i++) {
         for (int j = 0; j < TILING_COLS; j++) {
             float frequency = 0.02f; // smaller = smoother
-            float amplitude = 2.0f;
+            float amplitude = 1.0f;
             float height = 0.0f;
             for (int o = 0; o < 4; o++) {
-                height += pn.perlin(i * frequency, j * frequency) * amplitude;
+                height += pn.eval(glm::vec2(i * frequency, j * frequency)) * amplitude;
                 frequency *= 2.0f;
                 amplitude *= 0.5f;
             }
@@ -87,23 +87,27 @@ void TilingWorld::generateWorld(int seed) {
     for (int i = 0; i < TILING_ROWS; i++) {
         for (int k = 0; k < TILING_COLS; k++) {
             int height = tilingHeightmap[TILING_ROWS * i + k];
-            if (height == 0.0) {
-                waterTileTransforms.push_back(
+            float relativeHeight = static_cast<float>(height) / TILING_HEIGHT;
+            int j = 0;
+            for (; j < height; j++) {
+                terrainTileTransforms.push_back(
                     glm::translate(
                         glm::mat4(),
                         glm::vec3(
                             static_cast<float>(i),
-                            0.0f,
+                            static_cast<float>(j),
                             static_cast<float>(k)
                         )
                     )
                 );
-                waterTileColors.push_back(WATER);
+                //cubePhases[idx] = static_cast<float>(rand()) / RAND_MAX;
+                float relativeHeight = static_cast<float>(j) / TILING_HEIGHT;
+                terrainTileColors.push_back(getTileColor(relativeHeight));
                 NUM_CUBES++;
             }
-            else {
-                for (int j = 0; j < height; j++) {
-                    terrainTileTransforms.push_back(
+            if (relativeHeight < WATER_LEVEL) {
+                for (; j < static_cast<int>(WATER_LEVEL * TILING_HEIGHT); j++) {
+                    waterTileTransforms.push_back(
                         glm::translate(
                             glm::mat4(),
                             glm::vec3(
@@ -114,11 +118,42 @@ void TilingWorld::generateWorld(int seed) {
                         )
                     );
                     //cubePhases[idx] = static_cast<float>(rand()) / RAND_MAX;
-                    float relativeHeight = static_cast<float>(height) / TILING_HEIGHT;
-                    terrainTileColors.push_back(getTileColor(relativeHeight));
+                    waterTileColors.push_back(WATER);
                     NUM_CUBES++;
                 }
             }
+            //if (height == 0.0) {
+            //    waterTileTransforms.push_back(
+            //        glm::translate(
+            //            glm::mat4(),
+            //            glm::vec3(
+            //                static_cast<float>(i),
+            //                0.0f,
+            //                static_cast<float>(k)
+            //            )
+            //        )
+            //    );
+            //    waterTileColors.push_back(WATER);
+            //    NUM_CUBES++;
+            //}
+            //else {
+            //    for (int j = 0; j < height; j++) {
+            //        terrainTileTransforms.push_back(
+            //            glm::translate(
+            //                glm::mat4(),
+            //                glm::vec3(
+            //                    static_cast<float>(i),
+            //                    static_cast<float>(j),
+            //                    static_cast<float>(k)
+            //                )
+            //            )
+            //        );
+            //        //cubePhases[idx] = static_cast<float>(rand()) / RAND_MAX;
+            //        float relativeHeight = static_cast<float>(j) / TILING_HEIGHT;
+            //        terrainTileColors.push_back(getTileColor(relativeHeight));
+            //        NUM_CUBES++;
+            //    }
+            //}
         }
     }
     std::cout << "Created my cube transforms list with " << NUM_CUBES << " cubes." << std::endl;

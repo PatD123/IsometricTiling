@@ -7,9 +7,9 @@
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 
-const float WATER_LEVEL = 0.0f;
-const float SAND_LEVEL = 0.0f;
-const float DIRT_LEVEL = 0.2f;
+const float WATER_LEVEL = 0.2f;
+const float SAND_LEVEL = 0.25f;
+const float DIRT_LEVEL = 0.35f;
 const float GRASS_LEVEL = 0.4f;
 const float ROCK_LEVEL = 0.6f;
 const float SNOW_LEVEL = 0.8f;
@@ -24,13 +24,8 @@ class TilingWorld {
 public:
 	TilingWorld(int tiling_rows, int tiling_cols, int tiling_height, int omega, int amplitude);
 
-	// Generates world using Perlin Noise.
 	void generateWorld(int seed);
 
-	// Draws all the cubes in our world.
-	void renderTiling();
-
-	// Animating water without drawing them - renderTiling() does this.
 	void animateWater();
 
 	void renderTiles();
@@ -39,11 +34,11 @@ private:
 	glm::vec3 getTileColor(float height);
 
 	// World attributes
-	const int TILING_ROWS = 70;
-	const int TILING_COLS = 70;
-	const int TILING_HEIGHT = 40;
-	const float OMEGA = 5.0f;
-	const float AMPLITUDE = 0.2f;
+	int TILING_ROWS = 70;
+	int TILING_COLS = 70;
+	int TILING_HEIGHT = 40;
+	float OMEGA = 5.0f;
+	float AMPLITUDE = 0.2f;
 	int NUM_TILES = 0;
 
 	// All non water blocks

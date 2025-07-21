@@ -105,7 +105,7 @@ int main()
     std::vector<int> a;
     int tiling_rows = 70;
     int tiling_cols = 70;
-    int tiling_height = 40;
+    int tiling_height = 30;
     float omega = 5.0f;
     float amplitude = 0.2f;
     TilingWorld world(tiling_rows, tiling_cols, tiling_height, omega, amplitude);
