@@ -7,6 +7,8 @@
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 
+#include "../shapes/Cube.h"
+
 const float WATER_LEVEL = 0.2f;
 const float SAND_LEVEL = 0.25f;
 const float DIRT_LEVEL = 0.35f;
@@ -32,6 +34,12 @@ public:
 
 private:
 	glm::vec3 getTileColor(float height);
+	
+	// Updates GPU buffers
+	void updateTerrainTileTransformsGPU();
+	void updateWaterTileTransformsGPU();
+	void updateTerrainTileColorsGPU();
+	void updateWaterTileColorsGPU();
 
 	// World attributes
 	int TILING_ROWS = 70;
@@ -42,6 +50,9 @@ private:
 	int NUM_TILES = 0;
 
 	// All non water blocks
+
+	std::vector<Tile> terrainTiles;
+	std::vector<Tile> waterTiles;
 	
 	// Transforms for non-water and water tiles.
 	std::vector<glm::mat4> terrainTileTransforms;

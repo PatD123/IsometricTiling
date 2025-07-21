@@ -10,7 +10,6 @@
 
 #include "common/ShaderHelper.h"
 #include "common/PerlinNoise.hpp"
-#include "shapes/Cube.h"
 #include "camera/Camera.h"
 #include "tiling/TilingWorld.h"
 
@@ -105,12 +104,12 @@ int main()
     std::vector<int> a;
     int tiling_rows = 70;
     int tiling_cols = 70;
-    int tiling_height = 30;
-    float omega = 5.0f;
+    int tiling_height = 40;
+    float omega = 10.0f;
     float amplitude = 0.5f;
     TilingWorld world(tiling_rows, tiling_cols, tiling_height, omega, amplitude);
 
-    world.generateWorld(20);
+    world.generateWorld(2025);
 
     // FPS metrics
     double prevTime = 0.0;
