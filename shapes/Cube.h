@@ -8,7 +8,7 @@ class Tile {
 public:
 
     // All cubes have these vertices
-    static const float vertices[108];
+    static const float vertices[216];
 
     glm::mat4 m_transform;
     glm::vec3 m_color;

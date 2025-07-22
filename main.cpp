@@ -78,7 +78,7 @@ int main()
     float omega = 10.0f;
     float amplitude = 0.2f;
     glm::vec3 lightColor = glm::vec3(1.0f, 1.0f, 1.0f);
-    glm::mat4 lightPosition = glm::translate(glm::mat4(), glm::vec3(60.0f, 30.0f, 30.0f));
+    glm::vec3 lightPosition = glm::vec3(60.0f, 30.0f, 30.0f);
     TilingWorld world(tiling_rows, tiling_cols, tiling_height, omega, amplitude);
 
     world.generateWorld(2025);
@@ -90,16 +90,21 @@ int main()
     glBindVertexArray(lightVAO);
     glBindBuffer(GL_ARRAY_BUFFER, lightVBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(Tile::vertices), Tile::vertices, GL_STATIC_DRAW);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GL_FLOAT), (void*)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GL_FLOAT), (void*)0);
     glEnableVertexAttribArray(0);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
 
     // Add transform uniform to light cube shader.
-    sh.setUniformMat4fv(lightShaderProgram, "transform", glm::value_ptr(lightPosition));
+    sh.setUniformMat4fv(
+        lightShaderProgram,
+        "transform", 
+        glm::value_ptr(glm::translate(glm::mat4(), lightPosition))
+    );
 
-    // Add color uniform to world shader.
+    // Add light uniforms to world shader.
     sh.setUniform3fv(shaderProgram, "lightColor", glm::value_ptr(lightColor));
+    sh.setUniform3fv(shaderProgram, "lightPosition", glm::value_ptr(lightPosition));
 
     // FPS metrics
     double prevTime = 0.0;
