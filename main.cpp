@@ -14,30 +14,6 @@
 #include "tiling/TilingWorld.h"
 #include "shapes/Cube.h"
 
-// About tiling
-//const int NUM_CUBES = 100;
-//const int TILING_ROWS = 70;
-//const int TILING_COLS = 70;
-//const int TILING_HEIGHT = 40;
-//const float OMEGA = 5.0f;
-//const float AMPLITUDE = 0.2f;
-
-// Each terrain type is associated with 
-// - Elevation
-// - Color
-//const float WATER_LEVEL = 0.0f;
-//const float SAND_LEVEL  = 0.0f;
-//const float DIRT_LEVEL  = 0.2f;
-//const float GRASS_LEVEL = 0.4f;
-//const float ROCK_LEVEL  = 0.6f;
-//const float SNOW_LEVEL  = 0.8f;
-//const glm::vec3 WATER = glm::vec3(0.0f, 0.0f, 150.0f / 255.0f);
-//const glm::vec3 SAND = glm::vec3(237.0f / 255.0f, 201.0f / 255.0f, 175.0f / 255.0f);
-//const glm::vec3 DIRT = glm::vec3(155.0f / 255.0f, 118.0f / 255.0f, 83.0f / 255.0f);
-//const glm::vec3 GRASS = glm::vec3(34.0f / 255.0f, 139.0f / 255.0f, 34.0f / 255.0f);
-//const glm::vec3 ROCK = glm::vec3(120.0f / 255.0f, 120.0f / 255.0f, 120.0f / 255.0f);
-//const glm::vec3 SNOW = glm::vec3(1.0f, 1.0f, 1.0f);
-
 // Timing
 float PROGRAM_START_TIME = glfwGetTime();
 float deltaTime = 0.0f;	// Time between current frame and last frame
@@ -93,20 +69,16 @@ int main()
     // Capture cursor
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
-    // Sidenote on instancing
-    /*
-    glDrawArraysInstanced (or whatever it is called), you specify what your instance is, which 
-    if we want to draw cubes is 36 vertices, so that is now considered an "instance". We then
-    specify numInstances, which is self-explanatory. The VertexDiv function tells OpenGL how
-    often I should be switching to a new Matrix to transform our cube. We want it so that 
-    for each instance of a cube, we use a new matrix. That's what it does.
-    */
+
+    // Let's render some stuff!
     std::vector<int> a;
     int tiling_rows = 70;
     int tiling_cols = 70;
     int tiling_height = 30;
     float omega = 10.0f;
     float amplitude = 0.2f;
+    glm::vec3 lightColor = glm::vec3(1.0f, 1.0f, 1.0f);
+    glm::mat4 lightPosition = glm::translate(glm::mat4(), glm::vec3(60.0f, 30.0f, 30.0f));
     TilingWorld world(tiling_rows, tiling_cols, tiling_height, omega, amplitude);
 
     world.generateWorld(2025);
@@ -124,15 +96,10 @@ int main()
     glBindVertexArray(0);
 
     // Add transform uniform to light cube shader.
-    glUseProgram(lightShaderProgram);
-    glm::mat4 lightTransform = glm::translate(glm::mat4(), glm::vec3(60.0f, 30.0f, 30.0f));
-    GLuint lightTransformLoc = glGetUniformLocation(lightShaderProgram, "transform");
-    glUniformMatrix4fv(lightTransformLoc, 1, GL_FALSE, glm::value_ptr(lightTransform));
+    sh.setUniformMat4fv(lightShaderProgram, "transform", glm::value_ptr(lightPosition));
 
     // Add color uniform to world shader.
-    glUseProgram(shaderProgram);
-    GLuint lightColorLoc = glGetUniformLocation(shaderProgram, "lightColor");
-    glUniform3fv(lightColorLoc, 1, glm::value_ptr(glm::vec3(1.0, 1.0, 1.0)));
+    sh.setUniform3fv(shaderProgram, "lightColor", glm::value_ptr(lightColor));
 
     // FPS metrics
     double prevTime = 0.0;
@@ -177,28 +144,21 @@ int main()
         glm::mat4 proj = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 100.0f);
         glm::mat4 proj_view = proj * view;
 
-        glUseProgram(shaderProgram);
+        // Add transforms as uniforms (World shader program)
+        sh.setUniformMat4fv(shaderProgram, "model", glm::value_ptr(model));
+        sh.setUniformMat4fv(shaderProgram, "proj_view", glm::value_ptr(proj_view));
 
-        // add transforms as uniforms
-        GLuint model_loc = glGetUniformLocation(shaderProgram, "model");
-        glUniformMatrix4fv(model_loc, 1, GL_FALSE, glm::value_ptr(model));
-        GLuint proj_view_loc = glGetUniformLocation(shaderProgram, "proj_view");
-        glUniformMatrix4fv(proj_view_loc, 1, GL_FALSE, glm::value_ptr(proj_view));
+        // Add transforms as uniforms (Light shader program)
+        sh.setUniformMat4fv(lightShaderProgram, "model", glm::value_ptr(model));
+        sh.setUniformMat4fv(lightShaderProgram, "proj_view", glm::value_ptr(proj_view));
 
-        glUseProgram(lightShaderProgram);
+        // Draw
 
-        // add transforms as uniforms
-        model_loc = glGetUniformLocation(lightShaderProgram, "model");
-        glUniformMatrix4fv(model_loc, 1, GL_FALSE, glm::value_ptr(model));
-        proj_view_loc = glGetUniformLocation(lightShaderProgram, "proj_view");
-        glUniformMatrix4fv(proj_view_loc, 1, GL_FALSE, glm::value_ptr(proj_view));
-
-        // draw
-        glUseProgram(shaderProgram);
+        sh.useShaderProgram(shaderProgram);
         world.animateWater(currTime - PROGRAM_START_TIME);
         world.renderTiles();
 
-        glUseProgram(lightShaderProgram);
+        sh.useShaderProgram(lightShaderProgram);
         glBindVertexArray(lightVAO);
         glDrawArrays(GL_TRIANGLES, 0, 36);
 

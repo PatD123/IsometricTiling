@@ -9,18 +9,20 @@
 
 #include "../shapes/Cube.h"
 
+static glm::vec3 rgbToNormRGB(float r, float g, float b);
+
 const float WATER_LEVEL = 0.2f;
 const float SAND_LEVEL = 0.25f;
 const float DIRT_LEVEL = 0.35f;
 const float GRASS_LEVEL = 0.4f;
 const float ROCK_LEVEL = 0.6f;
 const float SNOW_LEVEL = 0.8f;
-const glm::vec3 WATER = glm::vec3(0.0f, 0.0f, 150.0f / 255.0f);
-const glm::vec3 SAND = glm::vec3(237.0f / 255.0f, 201.0f / 255.0f, 175.0f / 255.0f);
-const glm::vec3 DIRT = glm::vec3(155.0f / 255.0f, 118.0f / 255.0f, 83.0f / 255.0f);
-const glm::vec3 GRASS = glm::vec3(34.0f / 255.0f, 139.0f / 255.0f, 34.0f / 255.0f);
-const glm::vec3 ROCK = glm::vec3(120.0f / 255.0f, 120.0f / 255.0f, 120.0f / 255.0f);
-const glm::vec3 SNOW = glm::vec3(1.0f, 1.0f, 1.0f);
+const glm::vec3 WATER = rgbToNormRGB(7, 96, 198);
+const glm::vec3 SAND = rgbToNormRGB(237, 201, 175);
+const glm::vec3 DIRT = rgbToNormRGB(155, 118, 83);
+const glm::vec3 GRASS = rgbToNormRGB(34, 139, 34);
+const glm::vec3 ROCK = rgbToNormRGB(120, 120, 120);
+const glm::vec3 SNOW = rgbToNormRGB(255, 255, 255);
 
 class TilingWorld {
 public:
@@ -74,3 +76,7 @@ private:
 	GLuint terrainTileTransformsVBO, waterTileTransformsVBO;
 	GLuint terrainTileColorsVBO, waterTileColorsVBO;
 };
+
+glm::vec3 rgbToNormRGB(float r, float g, float b) {
+	return glm::vec3(r / 255.0f, g / 255.0f, b / 255.0f);
+}

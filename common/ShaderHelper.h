@@ -141,4 +141,21 @@ public:
 		return fShader;
 	}
 	
+	void setUniformMat4fv(GLuint shaderProgram, const char* uniformName, const GLfloat* uniformValue) {
+		glUseProgram(shaderProgram);
+		GLuint loc = glGetUniformLocation(shaderProgram, uniformName);
+		glUniformMatrix4fv(loc, 1, GL_FALSE, uniformValue);
+		glUseProgram(0);
+	}
+
+	void setUniform3fv(GLuint shaderProgram, const char* uniformName, const GLfloat* uniformValue) {
+		glUseProgram(shaderProgram);
+		GLuint loc = glGetUniformLocation(shaderProgram, uniformName);
+		glUniform3fv(loc, 1, uniformValue);
+		glUseProgram(0);
+	}
+
+	void useShaderProgram(GLuint shaderProgram) {
+		glUseProgram(shaderProgram);
+	}
 };
