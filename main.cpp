@@ -12,6 +12,7 @@
 #include "common/PerlinNoise.hpp"
 #include "camera/Camera.h"
 #include "tiling/TilingWorld.h"
+#include "shapes/Cube.h"
 
 // About tiling
 //const int NUM_CUBES = 100;
@@ -83,9 +84,8 @@ int main()
 
     // Compile and link shaders
     ShaderHelper sh;
-    GLuint shaderProgram = sh.compileShaders("VertexShader.glsl", "FragmentShader.glsl");
-
-    glUseProgram(shaderProgram);
+    GLuint shaderProgram = sh.compileShaders("shaders/VertexShader.glsl", "shaders/FragmentShader.glsl");
+    GLuint lightShaderProgram = sh.compileShaders("shaders/LightCubeVertexShader.glsl", "shaders/LightCubeFragmentShader.glsl");
 
     // Enable z-buffer depth testing
     glEnable(GL_DEPTH_TEST);
@@ -104,12 +104,35 @@ int main()
     std::vector<int> a;
     int tiling_rows = 70;
     int tiling_cols = 70;
-    int tiling_height = 40;
+    int tiling_height = 30;
     float omega = 10.0f;
-    float amplitude = 0.5f;
+    float amplitude = 0.2f;
     TilingWorld world(tiling_rows, tiling_cols, tiling_height, omega, amplitude);
 
     world.generateWorld(2025);
+
+    // Create light
+    GLuint lightVAO, lightVBO;
+    glGenBuffers(1, &lightVBO);
+    glGenVertexArrays(1, &lightVAO);
+    glBindVertexArray(lightVAO);
+    glBindBuffer(GL_ARRAY_BUFFER, lightVBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(Tile::vertices), Tile::vertices, GL_STATIC_DRAW);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GL_FLOAT), (void*)0);
+    glEnableVertexAttribArray(0);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
+
+    // Add transform uniform to light cube shader.
+    glUseProgram(lightShaderProgram);
+    glm::mat4 lightTransform = glm::translate(glm::mat4(), glm::vec3(60.0f, 30.0f, 30.0f));
+    GLuint lightTransformLoc = glGetUniformLocation(lightShaderProgram, "transform");
+    glUniformMatrix4fv(lightTransformLoc, 1, GL_FALSE, glm::value_ptr(lightTransform));
+
+    // Add color uniform to world shader.
+    glUseProgram(shaderProgram);
+    GLuint lightColorLoc = glGetUniformLocation(shaderProgram, "lightColor");
+    glUniform3fv(lightColorLoc, 1, glm::value_ptr(glm::vec3(1.0, 1.0, 1.0)));
 
     // FPS metrics
     double prevTime = 0.0;
@@ -154,18 +177,30 @@ int main()
         glm::mat4 proj = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 100.0f);
         glm::mat4 proj_view = proj * view;
 
+        glUseProgram(shaderProgram);
+
         // add transforms as uniforms
         GLuint model_loc = glGetUniformLocation(shaderProgram, "model");
         glUniformMatrix4fv(model_loc, 1, GL_FALSE, glm::value_ptr(model));
         GLuint proj_view_loc = glGetUniformLocation(shaderProgram, "proj_view");
         glUniformMatrix4fv(proj_view_loc, 1, GL_FALSE, glm::value_ptr(proj_view));
 
+        glUseProgram(lightShaderProgram);
+
+        // add transforms as uniforms
+        model_loc = glGetUniformLocation(lightShaderProgram, "model");
+        glUniformMatrix4fv(model_loc, 1, GL_FALSE, glm::value_ptr(model));
+        proj_view_loc = glGetUniformLocation(lightShaderProgram, "proj_view");
+        glUniformMatrix4fv(proj_view_loc, 1, GL_FALSE, glm::value_ptr(proj_view));
+
         // draw
         glUseProgram(shaderProgram);
-        /*glBindVertexArray(cubeVAO);
-        glDrawArraysInstanced(GL_TRIANGLES, 0, 36, NUM_CUBES);*/
         world.animateWater(currTime - PROGRAM_START_TIME);
         world.renderTiles();
+
+        glUseProgram(lightShaderProgram);
+        glBindVertexArray(lightVAO);
+        glDrawArrays(GL_TRIANGLES, 0, 36);
 
         glfwSwapBuffers(window);
         glfwPollEvents();
