@@ -14,8 +14,10 @@ uniform mat4 proj_view;
 
 void main()
 {
-    gl_Position = proj_view * aTransform * model * vec4(aPos, 1.0);
+    mat4 modelFull = aTransform * model;
+
+    gl_Position = proj_view * modelFull * vec4(aPos, 1.0);
     Color = aColor;
-    Normal = aNormal;
-    FragPos = vec3(model * vec4(aPos, 1.0));
+    Normal = mat3(transpose(inverse(modelFull))) * aNormal;  
+    FragPos = vec3(modelFull * vec4(aPos, 1.0));
 }

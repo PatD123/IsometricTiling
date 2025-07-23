@@ -78,7 +78,7 @@ int main()
     float omega = 10.0f;
     float amplitude = 0.2f;
     glm::vec3 lightColor = glm::vec3(1.0f, 1.0f, 1.0f);
-    glm::vec3 lightPosition = glm::vec3(60.0f, 30.0f, 30.0f);
+    glm::vec3 lightPosition = glm::vec3(30.0f, 10.0f, 35.0f);
     TilingWorld world(tiling_rows, tiling_cols, tiling_height, omega, amplitude);
 
     world.generateWorld(2025);
@@ -131,6 +131,16 @@ int main()
             prevTime = currTime;
             frameCounter = 0;
         }
+
+        // Move light
+        /*float newLightPosition = glm::sin(0.7f * currTime) * 80.0f + 60.0f;
+        lightPosition[0] = newLightPosition;
+        sh.setUniformMat4fv(
+            lightShaderProgram,
+            "transform",
+            glm::value_ptr(glm::translate(glm::mat4(), lightPosition))
+        );
+        sh.setUniform3fv(shaderProgram, "lightPosition", glm::value_ptr(lightPosition));*/
 
         float currentframe = (float)glfwGetTime();
         deltaTime = currentframe - lastFrame;
