@@ -115,6 +115,11 @@ int main()
     // Enable V-sync for v-blanks
     glfwSwapInterval(1);
 
+    // Enable early z depth testing
+    glEnable(GL_DEPTH_TEST);
+
+    glEnable(GL_CULL_FACE);
+
     std::cout << "Starting to render" << std::endl;
 
     while (!glfwWindowShouldClose(window))
