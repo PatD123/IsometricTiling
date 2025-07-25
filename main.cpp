@@ -74,14 +74,14 @@ int main()
     std::vector<int> a;
     int tiling_rows = 70;
     int tiling_cols = 70;
-    int tiling_height = 30;
+    int tiling_height = 50;
     float omega = 10.0f;
     float amplitude = 0.2f;
     glm::vec3 lightColor = glm::vec3(1.0f, 1.0f, 1.0f);
-    glm::vec3 lightPosition = glm::vec3(30.0f, 10.0f, 35.0f);
+    glm::vec3 lightPosition = glm::vec3(10.0f, 30.0f, 15.0f);
     TilingWorld world(tiling_rows, tiling_cols, tiling_height, omega, amplitude);
 
-    world.generateWorld(2025);
+    world.generateWorld(2013);
 
     // Create light
     GLuint lightVAO, lightVBO;
@@ -133,14 +133,17 @@ int main()
         }
 
         // Move light
-        /*float newLightPosition = glm::sin(0.7f * currTime) * 80.0f + 60.0f;
-        lightPosition[0] = newLightPosition;
+        float newLightPosX = 10.0 * glm::cos(currTime);
+        float newLightPosZ = 10.0 * glm::sin(currTime);
+        lightPosition[0] = newLightPosX + 40.0f;
+        lightPosition[2] = newLightPosZ + 15.0f;
         sh.setUniformMat4fv(
             lightShaderProgram,
             "transform",
             glm::value_ptr(glm::translate(glm::mat4(), lightPosition))
         );
-        sh.setUniform3fv(shaderProgram, "lightPosition", glm::value_ptr(lightPosition));*/
+        sh.setUniform3fv(shaderProgram, "lightPosition", glm::value_ptr(lightPosition));
+        sh.setUniform3fv(shaderProgram, "camPos", glm::value_ptr(cam.m_pos));
 
         float currentframe = (float)glfwGetTime();
         deltaTime = currentframe - lastFrame;
