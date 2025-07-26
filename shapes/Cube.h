@@ -16,4 +16,6 @@ public:
     bool m_isWater;
 
     Tile(glm::mat4 transform, glm::vec3 color, float phase, bool isWater);
+
+    virtual void updateTransform(const glm::mat4& trsnfm);
 };

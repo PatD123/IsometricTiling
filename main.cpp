@@ -72,7 +72,6 @@ int main()
 
 
     // Let's render some stuff!
-    std::vector<int> a;
     int tiling_rows = 70;
     int tiling_cols = 70;
     int tiling_height = 50;
@@ -81,11 +80,12 @@ int main()
     glm::vec3 lightColor = glm::vec3(1.0f, 1.0f, 1.0f);
     glm::vec3 lightPosition = glm::vec3(10.0f, 30.0f, 15.0f);
     TilingWorld world(tiling_rows, tiling_cols, tiling_height, omega, amplitude);
+    world.initLight(lightColor, lightPosition);
 
     world.generateWorld(2013);
 
     // Create light
-    GLuint lightVAO, lightVBO;
+    /*GLuint lightVAO, lightVBO;
     glGenBuffers(1, &lightVBO);
     glGenVertexArrays(1, &lightVAO);
     glBindVertexArray(lightVAO);
@@ -94,7 +94,7 @@ int main()
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GL_FLOAT), (void*)0);
     glEnableVertexAttribArray(0);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindVertexArray(0);
+    glBindVertexArray(0);*/
 
     // Add transform uniform to light cube shader.
     sh.setUniformMat4fv(
@@ -139,16 +139,13 @@ int main()
         }
 
         // Move light
-        float newLightPosX = 10.0 * glm::cos(currTime);
-        float newLightPosZ = 10.0 * glm::sin(currTime);
-        lightPosition[0] = newLightPosX + 40.0f;
-        lightPosition[2] = newLightPosZ + 15.0f;
+        glm::vec3 newLightPosition = world.animateLight();
         sh.setUniformMat4fv(
             lightShaderProgram,
             "transform",
-            glm::value_ptr(glm::translate(glm::mat4(), lightPosition))
+            glm::value_ptr(glm::translate(glm::mat4(), newLightPosition))
         );
-        sh.setUniform3fv(shaderProgram, "lightPosition", glm::value_ptr(lightPosition));
+        sh.setUniform3fv(shaderProgram, "lightPosition", glm::value_ptr(newLightPosition));
         sh.setUniform3fv(shaderProgram, "camPos", glm::value_ptr(cam.m_pos));
 
         float currentframe = (float)glfwGetTime();
@@ -183,8 +180,9 @@ int main()
         world.renderTiles();
 
         sh.useShaderProgram(lightShaderProgram);
-        glBindVertexArray(lightVAO);
-        glDrawArrays(GL_TRIANGLES, 0, 36);
+        world.renderLight();
+        /*glBindVertexArray(lightVAO);
+        glDrawArrays(GL_TRIANGLES, 0, 36);*/
 
         glfwSwapBuffers(window);
         glfwPollEvents();

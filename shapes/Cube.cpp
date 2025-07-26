@@ -59,3 +59,7 @@ const float Tile::vertices[216] = {
 Tile::Tile(glm::mat4 transform, glm::vec3 color, float phase, bool isWater) 
     : m_transform(transform), m_color(color), m_phase(phase), m_isWater(isWater)
 {}
+
+void Tile::updateTransform(const glm::mat4& trsnfm) {
+    m_transform = trsnfm;
+}

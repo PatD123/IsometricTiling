@@ -5,10 +5,9 @@
 
 #include "TilingWorld.h"
 #include "../common/PerlinNoise.hpp"
-#include "../shapes/Cube.h"
 
 TilingWorld::TilingWorld(int tiling_rows, int tiling_cols, int tiling_height, int omega, float amplitude)
-	: TILING_ROWS(tiling_rows), TILING_COLS(tiling_cols), TILING_HEIGHT(tiling_height), OMEGA(omega), AMPLITUDE(amplitude)
+    : TILING_ROWS(tiling_rows), TILING_COLS(tiling_cols), TILING_HEIGHT(tiling_height), OMEGA(omega), AMPLITUDE(amplitude), light(std::unique_ptr<Light>{})
 {
     glGenBuffers(1, &tileVBO);
     glBindBuffer(GL_ARRAY_BUFFER, tileVBO);
@@ -64,6 +63,15 @@ TilingWorld::TilingWorld(int tiling_rows, int tiling_cols, int tiling_height, in
     // Reset binds
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
+}
+
+void TilingWorld::initLight(glm::vec3& lightColor, glm::vec3& lightPosition) {
+    light = std::unique_ptr<Light>(
+        new Light(
+            glm::translate(glm::mat4(), lightPosition),
+            lightColor
+        )
+    );
 }
 
 void TilingWorld::generateWorld(int seed) {
@@ -224,11 +232,23 @@ void TilingWorld::animateWater(float timeDiff) {
     updateWaterTileTransformsGPU();
 }
 
+glm::vec3 TilingWorld::animateLight() {
+    double currTime = glfwGetTime();
+    float newLightPosX = 10.0 * glm::cos(currTime);
+    float newLightPosZ = 10.0 * glm::sin(currTime);
+    
+    return light->translate(newLightPosX, 0.0f, newLightPosZ);
+}
+
 void TilingWorld::renderTiles() {
     glBindVertexArray(terrainTileVAO);
     glDrawArraysInstanced(GL_TRIANGLES, 0, 36, terrainTiles.size());
     glBindVertexArray(waterTileVAO);
     glDrawArraysInstanced(GL_TRIANGLES, 0, 36, waterTiles.size());
+}
+
+void TilingWorld::renderLight() {
+    light->draw();
 }
 
 void TilingWorld::updateTerrainTileTransformsGPU() {
@@ -274,7 +294,6 @@ void TilingWorld::updateWaterTileColorsGPU() {
     glBufferData(GL_ARRAY_BUFFER, colors.size() * sizeof(glm::vec3), colors.data(), GL_STATIC_DRAW);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
-
 
 glm::vec3 TilingWorld::getTileColor(float height) {
     if (height >= SNOW_LEVEL) {

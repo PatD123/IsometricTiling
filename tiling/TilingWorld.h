@@ -8,6 +8,7 @@
 #include <glm/glm.hpp>
 
 #include "../shapes/Cube.h"
+#include "../light/Light.h"
 
 static glm::vec3 rgbToNormRGB(float r, float g, float b);
 
@@ -26,13 +27,25 @@ const glm::vec3 SNOW = rgbToNormRGB(255, 255, 255);
 
 class TilingWorld {
 public:
-	TilingWorld(int tiling_rows, int tiling_cols, int tiling_height, int omega, float amplitude);
+	TilingWorld(
+		int tiling_rows,
+		int tiling_cols,
+		int tiling_height,
+		int omega,
+		float amplitude
+	);
+
+	void initLight(glm::vec3& lightColor, glm::vec3& lightPosition);
 
 	void generateWorld(int seed);
 
 	void animateWater(float timeDiff);
 
+	glm::vec3 animateLight();
+
 	void renderTiles();
+
+	void renderLight();
 
 private:
 	glm::vec3 getTileColor(float height);
@@ -75,6 +88,9 @@ private:
 	GLuint terrainTileVAO, waterTileVAO;
 	GLuint terrainTileTransformsVBO, waterTileTransformsVBO;
 	GLuint terrainTileColorsVBO, waterTileColorsVBO;
+
+	// For light
+	std::unique_ptr<Light> light;
 };
 
 glm::vec3 rgbToNormRGB(float r, float g, float b) {
