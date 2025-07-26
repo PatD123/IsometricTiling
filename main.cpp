@@ -13,6 +13,7 @@
 #include "camera/Camera.h"
 #include "tiling/TilingWorld.h"
 #include "shapes/Cube.h"
+#include "light/Light.h"
 
 // Timing
 float PROGRAM_START_TIME = glfwGetTime();
