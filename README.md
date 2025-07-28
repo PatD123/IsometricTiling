@@ -1,4 +1,8 @@
-Cool first project to learn OpenGL: Isometric Tiling!
+OpenGL: Isometric Tiling
+- Directional Lighting
+- Shadow Mapping
+- Instancing
+- Procedural terrain generation using Perlin Noise
 
 TODO :exclamation:
 - [X] Orthographic, directional lighting
