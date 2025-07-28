@@ -78,7 +78,7 @@ int main()
     float omega = 10.0f;
     float amplitude = 0.2f;
     glm::vec3 lightColor = glm::vec3(1.0f, 1.0f, 1.0f);
-    glm::vec3 lightPosition = glm::vec3(30.0f, 30.0f, 40.0f);
+    glm::vec3 lightPosition = glm::vec3(0.0f, 40.0f, 0.0f);
     TilingWorld world(tiling_rows, tiling_cols, tiling_height, omega, amplitude);
     world.initLight(lightColor, lightPosition);
 
@@ -98,6 +98,8 @@ int main()
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    float borderColor[] = { 1.0, 1.0, 1.0, 1.0 };
+    glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
 
     glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthMap, 0);
@@ -129,7 +131,7 @@ int main()
     glfwSwapInterval(1);
 
     // Enable early z depth testing
-    glEnable(GL_DEPTH_TEST);
+    //glEnable(GL_DEPTH_TEST);
 
     // Culling back faces
     glEnable(GL_CULL_FACE);
@@ -177,14 +179,14 @@ int main()
         glm::mat4 lightProjection = glm::ortho(-200.0f, 200.0f, -200.0f, 200.0f, near_plane, far_plane);
         glm::mat4 lightView = glm::lookAt(
             newLightPosition,
-            glm::vec3(30.0f, 0.0f, 30.0f),
+            glm::vec3(70.0f, 0.0f, 70.0f),
             glm::vec3(0.0f, 1.0f, 0.0f));
         glm::mat4 lightSpace_proj_view = lightProjection * lightView; // World -> View -> Projection (Clip)
 
         // transforms of cube
         glm::mat4 model = glm::mat4(1.0f);
         glm::mat4 view = cam.getViewMat();
-        glm::mat4 proj = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 100.0f);
+        glm::mat4 proj = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, near_plane, far_plane);
         glm::mat4 proj_view = proj * view;
 
         // Set uniforms for first pass render with respect to light directional light.
@@ -218,10 +220,12 @@ int main()
         // Draw
         sh.useShaderProgram(shaderProgram);
         world.animateWater(currTime - PROGRAM_START_TIME);
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, depthMap);
         world.renderTiles();
 
         sh.useShaderProgram(lightShaderProgram);
-        world.renderLight();
+        //world.renderLight();
 
         glfwSwapBuffers(window);
         glfwPollEvents();

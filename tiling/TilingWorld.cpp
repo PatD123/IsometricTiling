@@ -234,8 +234,8 @@ void TilingWorld::animateWater(float timeDiff) {
 
 glm::vec3 TilingWorld::animateLight() {
     double currTime = glfwGetTime();
-    float newLightPosX = 10.0 * glm::cos(currTime);
-    float newLightPosZ = 10.0 * glm::sin(currTime);
+    float newLightPosX = 0.0f;//10.0 * glm::cos(currTime);
+    float newLightPosZ = 0.0f;//10.0 * glm::sin(currTime);
     
     return light->translate(newLightPosX, 0.0f, newLightPosZ);
 }
