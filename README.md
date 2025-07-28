@@ -1,6 +1,14 @@
 Cool first project to learn OpenGL: Isometric Tiling!
 
 TODO :exclamation:
+- [X] Orthographic, directional lighting
+
+
+https://github.com/user-attachments/assets/3c82ad62-ad2d-46f8-ad9a-bba7a2338c69
+
+<img width="646" height="510" alt="Screenshot 2025-07-27 184450" src="https://github.com/user-attachments/assets/14cce7b7-a4fc-4367-96a8-8cdde412b0e1" />
+
+
 - [X] Texturing or Lighting (one of the two).
   
 
