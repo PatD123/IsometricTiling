@@ -65,7 +65,7 @@ TilingWorld::TilingWorld(int tiling_rows, int tiling_cols, int tiling_height, in
     glBindVertexArray(0);
 }
 
-void TilingWorld::initLight(glm::vec3& lightColor, glm::vec3& lightPosition) {
+void TilingWorld::initLight(const glm::vec3& lightColor, const glm::vec3& lightPosition) {
     light = std::unique_ptr<Light>(
         new Light(
             glm::translate(glm::mat4(), lightPosition),

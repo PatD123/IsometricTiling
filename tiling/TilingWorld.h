@@ -35,7 +35,7 @@ public:
 		float amplitude
 	);
 
-	void initLight(glm::vec3& lightColor, glm::vec3& lightPosition);
+	void initLight(const glm::vec3& lightColor, const glm::vec3& lightPosition);
 
 	void generateWorld(int seed);
 
